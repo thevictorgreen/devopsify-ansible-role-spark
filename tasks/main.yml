@@ -1,6 +1,33 @@
 ---
-# tasks file for Spark
+# tasks file for roles/spark
 - name: Update Repositories
   become: yes
   apt:
     update_cache: yes
+
+- name: Create Spark automation directories
+  become: yes
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - '/root/.spark_automate'
+
+- name: Upload spark_init.sh File
+  become: yes
+  copy:
+    src: spark_init.sh
+    dest: /root/.spark_automate/spark_init.sh
+
+- name: Change permissions on spark_init.sh
+  become: yes
+  file:
+    path: /root/.spark_automate/spark_init.sh
+    mode: "u+rwx"
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Run Spark Initialization script
+  become: yes
+  command: /root/.spark_automate/spark_init.sh
+  args:
+    executable: /bin/bash
